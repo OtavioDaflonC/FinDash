@@ -19,21 +19,21 @@ app.layout = html.Div(
                         html.H4("Localities", style={"textAlign": "center"}),
                         dcc.Dropdown(
                             options=[
-                                {"label": "Itabira Britagem", "value": "itabira_britagem"},
-                                {"label": "Wash Plant", "value": "wash_plant"},
-                                {"label": "Itabira Sinter Feed", "value": "itabira_sinter_feed"},
-                                {"label": "Itabira Quartenario", "value": "itabira_quartenario"}
+                                {"label": "Asset1", "value": "asset1"},
+                                {"label": "Asset2", "value": "asset2"},
+                                {"label": "Asset3", "value": "asset3"}
+                                
                             ],
-                            placeholder="Select location",
+                            placeholder="Select Asset",
                             style={"color": "black"}
                         ),
                         html.Label("Analysis Options"),
                         dcc.Checklist(
                             options=[
-                                {"label": "Dynamic", "value": "dynamic"},
-                                {"label": "Efficiency/Integrity", "value": "efficiency_integrity"}
+                                {"label": "module_opt1", "value": "module_optv1"},
+                                {"label": "module_opt2", "value": "module_optv2"}
                             ],
-                            value=["dynamic"],
+                            value=["multi_frame_page"],
                             style={"color": "white"}
                         )
                     ]
@@ -48,29 +48,29 @@ app.layout = html.Div(
                                 html.Div(
                                     style={"backgroundColor": "#2c2c2c", "padding": "10px", "borderRadius": "5px"},
                                     children=[
-                                        html.H6("BPFI", style={"textAlign": "center"}),
-                                        html.H3("0.051", style={"textAlign": "center"})
+                                        html.H6("variable4", style={"textAlign": "center"}),
+                                        html.H3("value", style={"textAlign": "center"})
                                     ]
                                 ),
                                 html.Div(
                                     style={"backgroundColor": "#2c2c2c", "padding": "10px", "borderRadius": "5px"},
                                     children=[
-                                        html.H6("BSF", style={"textAlign": "center"}),
-                                        html.H3("0.009", style={"textAlign": "center"})
+                                        html.H6("variable3", style={"textAlign": "center"}),
+                                        html.H3("value", style={"textAlign": "center"})
                                     ]
                                 ),
                                 html.Div(
                                     style={"backgroundColor": "#2c2c2c", "padding": "10px", "borderRadius": "5px"},
                                     children=[
-                                        html.H6("Acceleration", style={"textAlign": "center"}),
-                                        html.H3("0.392 G", style={"textAlign": "center"})
+                                        html.H6("variable", style={"textAlign": "center"}),
+                                        html.H3("value", style={"textAlign": "center"})
                                     ]
                                 ),
                                 html.Div(
                                     style={"backgroundColor": "#2c2c2c", "padding": "10px", "borderRadius": "5px"},
                                     children=[
-                                        html.H6("Speed", style={"textAlign": "center"}),
-                                        html.H3("11.874 mm/s", style={"textAlign": "center"})
+                                        html.H6("variable2", style={"textAlign": "center"}),
+                                        html.H3("value", style={"textAlign": "center"})
                                     ]
                                 )
                             ]

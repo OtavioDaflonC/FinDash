@@ -5,7 +5,9 @@ __pycache__/
 
 # C extensions
 *.so
-
+#====================
+teste_layout.ipynb 
+#====================
 # Distribution / packaging
 .Python
 build/
