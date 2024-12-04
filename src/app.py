@@ -1,10 +1,16 @@
 import pandas as pd
+import dash
 import plotly.express as px
 from dash import Dash, html, dcc, callback
 from dash.dependencies import Input, Output
+import plotly.graph_objects as go
 # style = 
-app = Dash(__name__, pages_folder='pages',use_pages=True)#external_stylesheets=style
-
+app = Dash(__name__, pages_folder='modules',use_pages=True)#external_stylesheets=style
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=["01/01/2024", "01/03/2024", "01/05/2024", "01/07/2024", "01/11/2024"],
+                         y=[0.5, 0.7, 1.2, 2.5, 3.5]
+)
+)
 # Layout do dashboard
 app.layout = html.Div(
     style={"backgroundColor": "#1e1e1e", "color": "#FFFFFF", "fontFamily": "Arial"},
@@ -84,7 +90,8 @@ app.layout = html.Div(
                     ]
                 )
             ]
-        )
+        ),
+        dash.page_container
     ]
 )
 
