@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 macro_time = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 tickers = ["BBAS3", "CSNA3", "FLRY3", "ITSA4", "KEPL3", "KLBN4", "TAEE4", "UNIP3", "MXRF11", "VGIR11", "VALE3", 'GOAU4']
 df = pd.DataFrame(index=macro_time)
-
+## Charts
 def analisar_serie_temporal_yahoo(ticker, janela_anos=5):
     """
     Analyzes a time series of stock prices obtained via Yahoo Finance,
@@ -114,3 +114,8 @@ plotar_historico_acao(ticker)
 # for ticker in tickers:
 #     ticker = ticker + '.SA'
 #     df[ticker] = [analisar_serie_temporal_yahoo(ticker, time) for time in macro_time]
+
+#=========================================================================
+
+## Widgets
+
