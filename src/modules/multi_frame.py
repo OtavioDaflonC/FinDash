@@ -54,17 +54,7 @@ def analisar_serie_temporal_yahoo(ticker, janela_anos=5):
 
     return media_diferenca_percentual#, dispersao_percentual
 
-# USAGE TEST
 
-ticker = "BBAS3.SA"  # Example: Apple Inc.
-janela_anos = 5
-
-# # media, dispersao = analisar_serie_temporal_yahoo(ticker, janela_anos)
-media = analisar_serie_temporal_yahoo(ticker, janela_anos)
-
-# print(f"Average percentage difference: {media:.2f}%")
-# print(f"Percentage dispersion (standard deviation): {dispersao:.2f}%")
-media
 
 import plotly.graph_objects as go
 
@@ -111,9 +101,16 @@ ticker = "GOAU4.SA"  # Replace with the desired ticker
 plotar_historico_acao(ticker)
 
 # Jan 2019: 4.76
+#==========================================================================
+# USAGE TEST
 
-7.83 / 4.76
+# ticker = "BBAS3.SA"  # Example: Apple Inc.
+# janela_anos = 5
 
-for ticker in tickers:
-    ticker = ticker + '.SA'
-    df[ticker] = [analisar_serie_temporal_yahoo(ticker, time) for time in macro_time]
+# # # media, dispersao = analisar_serie_temporal_yahoo(ticker, janela_anos)
+# media = analisar_serie_temporal_yahoo(ticker, janela_anos)
+
+
+# for ticker in tickers:
+#     ticker = ticker + '.SA'
+#     df[ticker] = [analisar_serie_temporal_yahoo(ticker, time) for time in macro_time]
