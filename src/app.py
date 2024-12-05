@@ -1,99 +1,16 @@
-import pandas as pd
 import dash
-import plotly.express as px
-from dash import Dash, html, dcc, callback
-from dash.dependencies import Input, Output
-import plotly.graph_objects as go
-# style = 
-app = Dash(__name__, pages_folder='modules',use_pages=True)#external_stylesheets=style
-fig = go.Figure()
-fig.add_trace(go.Scatter(x=["01/01/2024", "01/03/2024", "01/05/2024", "01/07/2024", "01/11/2024"],
-                         y=[0.5, 0.7, 1.2, 2.5, 3.5]
-)
-)
-# Layout do dashboard
+from dash import html
+
+# Configuração do Dash com suporte para múltiplas páginas
+app = dash.Dash(__name__, pages_folder="modules", use_pages=True)
+
+# Layout 
 app.layout = html.Div(
     style={"backgroundColor": "#1e1e1e", "color": "#FFFFFF", "fontFamily": "Arial"},
     children=[
-        html.Div(
-            style={"display": "flex", "padding": "20px", "gap": "20px"},
-            children=[
-                # Sidebar
-                html.Div(
-                    style={"width": "20%", "backgroundColor": "#2c2c2c", "padding": "10px", "borderRadius": "10px"},
-                    children=[
-                        html.H4("Localities", style={"textAlign": "center"}),
-                        dcc.Dropdown(
-                            options=[
-                                {"label": "Asset1", "value": "asset1"},
-                                {"label": "Asset2", "value": "asset2"},
-                                {"label": "Asset3", "value": "asset3"}
-                                
-                            ],
-                            placeholder="Select Asset",
-                            style={"color": "black"}
-                        ),
-                        html.Label("Analysis Options"),
-                        dcc.Checklist(
-                            options=[
-                                {"label": "module_opt1", "value": "module_optv1"},
-                                {"label": "module_opt2", "value": "module_optv2"}
-                            ],
-                            value=["multi_frame_page"],
-                            style={"color": "white"}
-                        )
-                    ]
-                ),
-                # Main Content
-                html.Div(
-                    style={"width": "75%", "padding": "10px", "borderRadius": "10px"},
-                    children=[
-                        html.Div(
-                            style={"display": "grid", "gridTemplateColumns": "repeat(4, 1fr)", "gap": "10px"},
-                            children=[
-                                html.Div(
-                                    style={"backgroundColor": "#2c2c2c", "padding": "10px", "borderRadius": "5px"},
-                                    children=[
-                                        html.H6("variable4", style={"textAlign": "center"}),
-                                        html.H3("value", style={"textAlign": "center"})
-                                    ]
-                                ),
-                                html.Div(
-                                    style={"backgroundColor": "#2c2c2c", "padding": "10px", "borderRadius": "5px"},
-                                    children=[
-                                        html.H6("variable3", style={"textAlign": "center"}),
-                                        html.H3("value", style={"textAlign": "center"})
-                                    ]
-                                ),
-                                html.Div(
-                                    style={"backgroundColor": "#2c2c2c", "padding": "10px", "borderRadius": "5px"},
-                                    children=[
-                                        html.H6("variable", style={"textAlign": "center"}),
-                                        html.H3("value", style={"textAlign": "center"})
-                                    ]
-                                ),
-                                html.Div(
-                                    style={"backgroundColor": "#2c2c2c", "padding": "10px", "borderRadius": "5px"},
-                                    children=[
-                                        html.H6("variable2", style={"textAlign": "center"}),
-                                        html.H3("value", style={"textAlign": "center"})
-                                    ]
-                                )
-                            ]
-                        ),
-                        html.Div(
-                            style={"marginTop": "20px"},
-                            children=[
-                                dcc.Graph(figure=fig)
-                            ]
-                        )
-                    ]
-                )
-            ]
-        ),
-        dash.page_container
-    ]
+        dash.page_container,  # Renderiza apenas a página atual
+    ],
 )
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run_server(debug=True)

@@ -22,7 +22,7 @@ layout = html.Div(
                 'marginBottom': '2rem',
             },
             children=html.Img(
-                src='../assets/findash_img.png',  # Substitua pelo caminho da sua logo
+                src='../assets/findash_img.png', 
                 style={'height': '100px', 'borderRadius': '8px'}
             )
         ),
@@ -71,7 +71,7 @@ layout = html.Div(
                             'cursor': 'pointer',
                         }
                     ),
-                    href='/dashboard'  # Link para a página do dashboard
+                    href='/main'
                 ),
                 dcc.Link(
                     html.Button(
