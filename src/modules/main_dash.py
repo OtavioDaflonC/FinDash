@@ -1,6 +1,7 @@
 import dash
-from dash import html, dcc
+from dash import html, dcc, Input, Output
 import plotly.graph_objects as go
+import numpy as np
 
 # Register Main Page
 dash.register_page(
@@ -8,6 +9,51 @@ dash.register_page(
     path="/main",  # main path
     name="Dashboard",
 )
+
+# Gerar arrays predefinidos
+def generate_random_data(size=1000):
+    x = list(range(size))
+    y = np.cumsum(np.random.normal(0, 3, size)) + 4  # Série estocástica acumulada
+    return x, y
+
+# Dados predefinidos
+predefined_x, predefined_y = generate_random_data()
+
+# Criar layout do gráfico inicial com um ponto
+def create_fig_with_point(index):
+    fig = go.Figure(
+        layout=go.Layout(
+            xaxis=dict(
+                visible=False,
+                range=[0, 1000],  # Scale
+            ),
+            yaxis=dict(
+                visible=False,
+                range=[0, 50],  # Scale
+            ),
+            margin=dict(t=0, b=0, l=0, r=0),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=predefined_x[:index],
+            y=predefined_y[:index],
+            mode="lines",
+            line=dict(color="lime", width=2),
+        )
+    )
+    return fig
+
+# Gerando os dados
+predefined_x, predefined_y = generate_random_data()
+
+# Criando o gráfico estático com os dados predefinidos
+
+# Criando o gráfico com os dados predefinidos
+# fig_animation = create_static_animation(predefined_x, predefined_y)
 
 # Gráfico de exemplo
 fig = go.Figure()
@@ -18,10 +64,56 @@ fig.add_trace(
     )
 )
 
-# Layout da página principal
+# Main layout
 layout = html.Div(
     style={"backgroundColor": "#1e1e1e", "color": "#FFFFFF", "fontFamily": "Arial"},
     children=[
+        # Header
+        html.Div(
+            style={
+                "display": "flex",
+                "alignItems": "center",
+                "justifyContent": "space-between",
+                "padding": "10px 20px",
+                "backgroundColor": "#2c2c2c",
+                "borderRadius": "10px",
+                "marginBottom": "20px",
+                "position": "relative",
+            },
+            children=[
+                html.Img(
+                    src="./assets/findash_img.png",
+                    alt="FinDash Logo",
+                    style={"height": "50px","zIndex": "1"},
+                ),
+                html.H1(
+                    "FinDash",
+                    style={"margin": "0", "fontSize": "24px", "color": "#FFFFFF","zIndex": "1"},
+                ),
+                dcc.Graph(
+                    id="header-animation",
+                    figure=create_fig_with_point(1),  # Inicializa com o primeiro ponto
+                    style={
+                        "position": "absolute",
+                        "top": "0",
+                        "left": "0",
+                        "right": "0",
+                        "bottom": "0",
+                        "height": "100%",
+                        "width": "100%",
+                        "pointerEvents": "none",
+                        "zIndex": "0",
+                    },
+                    config={"staticPlot": True},
+                ),
+                dcc.Interval(
+                    id="interval-update",
+                    interval=200,  # Atualiza a cada segundo
+                    n_intervals=0,  # Inicialização
+                ),
+            ],
+        ),
+        # Main content
         html.Div(
             style={"display": "flex", "padding": "20px", "gap": "20px"},
             children=[
@@ -99,3 +191,13 @@ layout = html.Div(
         ),
     ],
 )
+
+# Callback para atualizar o gráfico com o próximo ponto
+@dash.callback(
+    Output("header-animation", "figure"),
+    Input("interval-update", "n_intervals"),
+)
+def update_animation(n_intervals):
+    # Limitar o índice ao tamanho dos dados
+    index = min(n_intervals + 1, len(predefined_x))
+    return create_fig_with_point(index)
