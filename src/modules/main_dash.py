@@ -11,11 +11,11 @@ dash.register_page(
 )
 
 # Gerar arrays predefinidos
+grath_xsize = 1000
 def generate_random_data(size=1000):
     x = list(range(size))
-    y = np.cumsum(np.random.normal(0, 3, size)) + 4  # Série estocástica acumulada
+    y = (np.cumsum(np.random.normal(0, 2, size))**2 +1) /90 # Série estocástica acumulada
     return x, y
-
 # Dados predefinidos
 predefined_x, predefined_y = generate_random_data()
 
@@ -25,7 +25,7 @@ def create_fig_with_point(index):
         layout=go.Layout(
             xaxis=dict(
                 visible=False,
-                range=[0, 1000],  # Scale
+                range=[0, grath_xsize],  # Scale
             ),
             yaxis=dict(
                 visible=False,
@@ -94,21 +94,20 @@ layout = html.Div(
                     id="header-animation",
                     figure=create_fig_with_point(1),  # Inicializa com o primeiro ponto
                     style={
-                        "position": "absolute",
-                        "top": "0",
-                        "left": "0",
-                        "right": "0",
-                        "bottom": "0",
-                        "height": "100%",
-                        "width": "100%",
-                        "pointerEvents": "none",
-                        "zIndex": "0",
+                        "position": "absolute",  # Mantém o posicionamento relativo à div pai
+                        "top": "10%",  # Deixa 10% de espaço a partir do topo da div pai
+                        "left": "10%",  # Deixa 10% de espaço a partir da margem esquerda da div pai
+                        "height": "80%",  # Limita a altura do gráfico para 80% da altura da div pai
+                        "width": "80%",  # Limita a largura do gráfico para 80% da largura da div pai
+                        "pointerEvents": "none",  # Torna o gráfico não interativo
+                        "zIndex": "0",  # Garante que o gráfico fique atrás de outros elementos
                     },
-                    config={"staticPlot": True},
+                    config={"staticPlot": True},  # Remove interatividade
                 ),
+
                 dcc.Interval(
                     id="interval-update",
-                    interval=200,  # Atualiza a cada segundo
+                    interval=300,  # update animation time
                     n_intervals=0,  # Inicialização
                 ),
             ],
