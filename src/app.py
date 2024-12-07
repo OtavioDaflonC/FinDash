@@ -1,5 +1,8 @@
 import dash
 from dash import html
+import sys
+import os
+sys.path.append(os.path.abspath("src"))
 
 # Configuração do Dash com suporte para múltiplas páginas
 app = dash.Dash(__name__, pages_folder="modules", use_pages=True)

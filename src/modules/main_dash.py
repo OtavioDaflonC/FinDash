@@ -1,9 +1,16 @@
 import dash
+import pandas as pd
 from dash import html, dcc, Input, Output
 import plotly.graph_objects as go
 import numpy as np
+import plotly.express as px
+from modules.multi_frame import multi_frame_fig
 
-# Register Main Page
+#=========================================================================
+#multi_frame
+
+
+
 dash.register_page(
     __name__,
     path="/main",  # main path
@@ -131,14 +138,15 @@ layout = html.Div(
                             style={"color": "black"},
                         ),
                         html.Label("Analysis Options"),
-                        dcc.Checklist(
-                            options=[
-                                {"label": "module_opt1", "value": "module_optv1"},
-                                {"label": "module_opt2", "value": "module_optv2"},
+                        # Botões para selecionar os gráficos
+                        html.Div(
+                            style={"display": "flex", "flexDirection": "column", "gap": "10px", "marginTop": "20px"},
+                            children=[
+                                html.Button("Multi Frame", id="multi_frame", n_clicks=0, style={"padding": "10px"}),
+                                html.Button("option2", id="opt2", n_clicks=0, style={"padding": "10px"}),
                             ],
-                            value=["multi_frame_page"],
-                            style={"color": "white"},
                         ),
+
                     ],
                 ),
                 # Main Content
@@ -181,7 +189,7 @@ layout = html.Div(
                         html.Div(
                             style={"marginTop": "20px"},
                             children=[
-                                dcc.Graph(figure=fig),
+                                dcc.Graph(id="main-graph", figure=fig),  # Adicionando ID ao gráfico
                             ],
                         ),
                     ],
@@ -191,12 +199,33 @@ layout = html.Div(
     ],
 )
 
-# Callback para atualizar o gráfico com o próximo ponto
+
 @dash.callback(
     Output("header-animation", "figure"),
     Input("interval-update", "n_intervals"),
 )
-def update_animation(n_intervals):
+def update_header_animation(n_intervals):
     # Limitar o índice ao tamanho dos dados
     index = min(n_intervals + 1, len(predefined_x))
     return create_fig_with_point(index)
+
+@dash.callback(
+    Output("main-graph", "figure"),  # Atualiza o gráfico principal
+    [Input("multi_frame", "n_clicks"), Input("opt2", "n_clicks")],  # Botões como entrada
+)
+def update_graph(btn1_clicks, btn2_clicks):
+    # Determinar qual botão foi clicado
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return fig  # Retorna o gráfico padrão se nenhum botão foi clicado
+    else:
+        button_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    # Atualizar o gráfico com base no botão clicado
+    if button_id == "multi_frame":
+        return multi_frame_fig  # Substitui pelo gráfico definido
+    elif button_id == "opt2":
+        # Substituir por outro gráfico, se necessário
+        return create_fig_with_point(50)  # Exemplo de gráfico com 50 pontos
+
+    return fig  # Retorna o gráfico padrão se nenhuma condição foi atendida
