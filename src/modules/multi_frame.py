@@ -98,19 +98,6 @@ def plot_(ticker='PETR4.SA'):
 
 
 
-# Example usage
-# ticker = "GOAU4.SA"  # Replace with the desired ticker
-
-
-# Jan 2019: 4.76
-
-# USAGE TEST
-
-# ticker = "BBAS3.SA"  # Example: Apple Inc.
-# janela_anos = 5
-
-# # # media, dispersao = analisar_serie_temporal_yahoo(ticker, janela_anos)
-# media = analisar_serie_temporal_yahoo(ticker, janela_anos)
 
 
 for ticker in tickers:
@@ -118,8 +105,4 @@ for ticker in tickers:
     df[ticker] = [analisar_serie_temporal_yahoo(ticker, time) for time in macro_time]
 
 multi_frame_fig = px.line(df)
-# ## Widgets
 
-
-# #=========================================================================
-# # Register Main Page
