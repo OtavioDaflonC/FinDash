@@ -1,6 +1,6 @@
 import dash
 import pandas as pd
-from dash import html, dcc, Input, Output
+from dash import html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
 import plotly.express as px
@@ -135,6 +135,21 @@ layout = html.Div(
                             placeholder="Digite os tickers separados por vírgulas (ex: AAPL, TSLA, MSFT)",
                             style={"width": "100%"}
                         ),
+                        html.Button(
+                                "Calcular",
+                                id="calculate-button",
+                                n_clicks=0,
+                                style={
+                                    "width": "100%",
+                                    "padding": "10px",
+                                    "backgroundColor": "#007BFF",
+                                    "color": "white",
+                                    "border": "none",
+                                    "borderRadius": "5px",
+                                    "cursor": "pointer",
+                                },
+                            ),
+
                         html.Label("Analysis Options"),
                         # Botões para selecionar os gráficos
                         html.Div(
@@ -220,10 +235,11 @@ def update_header_animation(n_intervals):
     [
         Input("multi_frame", "n_clicks"),  # Botão Multi Frame
         Input("opt2", "n_clicks"),        # Outro botão
-        Input("input-stocks", "value"),  # Entrada do campo de texto
+        Input("calculate-button", "n_clicks"),  # Botão Calcular
     ],
+    [State("input-stocks", "value")]  # Estado do campo de texto
 )
-def update_graph(btn1_clicks, btn2_clicks, ticker_input):
+def update_graph(btn1_clicks, btn2_clicks, calc_button,ticker_input):
     ctx = dash.callback_context
     if not ctx.triggered:
         return fig  # Retorna o gráfico padrão se nenhuma interação ocorreu
@@ -235,7 +251,7 @@ def update_graph(btn1_clicks, btn2_clicks, ticker_input):
         return create_placeholder_figure()  # Gráfico específico para o botão Multi Frame
     elif triggered_input == "opt2":
         return create_fig_with_point(50)  # Exemplo de alternativa
-    elif triggered_input == "input-stocks" and ticker_input:
+    elif triggered_input == "calculate-button" and ticker_input:
         # Lógica para atualizar o gráfico com base no campo de texto
         for ticker in ticker_input.split(","):  # Suporta múltiplos tickers separados por vírgulas
             ticker = ticker.strip() + ".SA"
@@ -245,39 +261,3 @@ def update_graph(btn1_clicks, btn2_clicks, ticker_input):
 
     return fig  # Retorna o gráfico padrão como fallback
 
-# @dash.callback(
-#     Output("main-graph", "figure"),  # Atualiza o gráfico principal
-#     [Input("multi_frame", "n_clicks"), Input("opt2", "n_clicks")],  # Botões como entrada
-#     allow_duplicate=True
-# )
-# def update_graph(btn1_clicks, btn2_clicks):
-#     # Determinar qual botão foi clicado
-#     ctx = dash.callback_context
-#     if not ctx.triggered:
-#         return fig  # Retorna o gráfico padrão se nenhum botão foi clicado
-#     else:
-#         button_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-#     # Atualizar o gráfico com base no botão clicado
-#     if button_id == "multi_frame":
-#         return fig  # Substitui pelo gráfico definido
-#     elif button_id == "opt2":
-#         # Substituir por outro gráfico, se necessário
-#         return create_fig_with_point(50)  # Exemplo de gráfico com 50 pontos
-
-#     return fig  # Retorna o gráfico padrão se nenhuma condição foi atendida
-
-# # Callbacks
-# @dash.callback(
-#     Output("main-graph", "figure"),  # Atualiza o gráfico principal
-#     Input("input-stocks", "value"),  # Entrada do campo de texto
-#     allow_duplicate=True
-# )
-# def update_graph(ticker):
-
-#     for ticker in tickers:
-#         ticker = ticker + '.SA'
-#         df[ticker] = [analisar_serie_temporal_yahoo(ticker, time) for time in macro_time]
-
-#         multi_frame_fig = px.line(df)
-#         return multi_frame_fig
