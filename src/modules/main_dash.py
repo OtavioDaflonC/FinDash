@@ -129,12 +129,12 @@ layout = html.Div(
                     style={"width": "20%", "backgroundColor": "#2c2c2c", "padding": "10px", "borderRadius": "10px"},
                     children=[
                         html.H4("Select your stocks", style={"textAlign": "center"}),
-                 dcc.Input(
-                    id="input-stocks",
-                    type="text",
-                    placeholder="Let's try some stocks...",
-                    style={"display": "flex", "flexDirection": "column", "gap": "10px", "marginTop": "16px"}
-                ),
+                        dcc.Input(
+                            id="input-stocks",
+                            type="text",
+                            placeholder="Digite os tickers separados por vírgulas (ex: AAPL, TSLA, MSFT)",
+                            style={"width": "100%"}
+                        ),
                         html.Label("Analysis Options"),
                         # Botões para selecionar os gráficos
                         html.Div(

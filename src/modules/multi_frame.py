@@ -7,7 +7,7 @@ import plotly.express as px
 
 
 macro_time = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-tickers = ["BBAS3",'GOAU4']
+# tickers = ["BBAS3",'GOAU4']
 df = pd.DataFrame(index=macro_time)
 ## Charts
 def analisar_serie_temporal_yahoo(ticker, janela_anos=5):
@@ -32,7 +32,6 @@ def analisar_serie_temporal_yahoo(ticker, janela_anos=5):
 
     # Ensure the index is reset (to handle date-based indices)
     df.reset_index(inplace=True)
-
     # Filter the necessary columns
     df = df[['Date', 'Close']]
     df.rename(columns={'Date': 'Data', 'Close': 'Preco'}, inplace=True)
@@ -100,9 +99,4 @@ def plot_(ticker='PETR4.SA'):
 
 
 
-for ticker in tickers:
-    ticker = ticker + '.SA'
-    df[ticker] = [analisar_serie_temporal_yahoo(ticker, time) for time in macro_time]
-
-multi_frame_fig = px.line(df)
 
