@@ -1,13 +1,13 @@
 import dash
 import pandas as pd
-from dash import html, dcc, Input, Output, State
+from dash import html, dcc, Input, Output, State, ctx
 import plotly.graph_objects as go
 import numpy as np
 import plotly.express as px
 # from modules.multi_frame import *
 from modules.wallet_simulation import wallet_simulate
 from utils import *
-
+asset={}
 #=========================================================================
 # for example:
 
@@ -121,13 +121,28 @@ layout = html.Div(
                     },
                     children=[
                         html.H4(
-                            "Selecione seus ativos",
+                            "Select Assets",
                             style={"textAlign": "center", "marginBottom": "20px", "fontSize": "18px"},
                         ),
+                        dcc.Store(id="stored-stocks-data"),
                         dcc.Input(
-                            id="input-stocks",
-                            type="text",
-                            placeholder="Digite os tickers separados por vírgulas (ex: AAPL, TSLA, MSFT)",
+                            id="dropdown-stocks",
+                            type='text',
+                            placeholder="Add a stock to the list",
+                            style={
+                                "width": "100%",
+                                "padding": "10px",
+                                "marginBottom": "10px",
+                                "borderRadius": "5px",
+                                "border": "1px solid #ccc",
+                            },
+                        ),
+                        dcc.Input(
+                            id="input-percentage",
+                            type="number",
+                            placeholder="Add the weight of the stock in wallet (%)",
+                            min=0,
+                            max=100,
                             style={
                                 "width": "100%",
                                 "padding": "10px",
@@ -137,8 +152,8 @@ layout = html.Div(
                             },
                         ),
                         html.Button(
-                            "Calcular",
-                            id="calculate-button",
+                            "Adicionar Ativo",
+                            id="add-stock-button",
                             n_clicks=0,
                             style={
                                 "width": "100%",
@@ -151,6 +166,10 @@ layout = html.Div(
                                 "fontSize": "16px",
                                 "marginBottom": "20px",
                             },
+                        ),
+                        html.Div(
+                            id="stocks-list",
+                            style={"marginTop": "20px", "color": "#FFFFFF"},
                         ),
                         html.H5(
                             "Opções de análise",
@@ -189,51 +208,51 @@ layout = html.Div(
                                     ),
                                     href='/multi-frame'
                                 ),
-                                # dcc.Link(
-                                #     html.Button(
-                                #         "Midia Pred",
-                                #         id="midia_pred",
-                                #         n_clicks=0,
-                                #         style={
-                                #             "padding": "10px",
-                                #             "borderRadius": "5px",
-                                #             "backgroundColor": "#3a3a3a",
-                                #             "color": "white",
-                                #             "fontSize": "14px",
-                                #         },
-                                #     ),
-                                #     href='/midia_pred'
-                                # ),
-                                # dcc.Link(
-                                #     html.Button(
-                                #         "Buy/Sell Trend",
-                                #         id="bstrends",
-                                #         n_clicks=0,
-                                #         style={
-                                #             "padding": "10px",
-                                #             "borderRadius": "5px",
-                                #             "backgroundColor": "#3a3a3a",
-                                #             "color": "white",
-                                #             "fontSize": "14px",
-                                #         },
-                                #     ),
-                                #     href='/bstrend'
-                                # ),
-                                # dcc.Link(
-                                #     html.Button(
-                                #         "Breakpoints",
-                                #         id="breakpoints",
-                                #         n_clicks=0,
-                                #         style={
-                                #             "padding": "10px",
-                                #             "borderRadius": "5px",
-                                #             "backgroundColor": "#3a3a3a",
-                                #             "color": "white",
-                                #             "fontSize": "14px",
-                                #         },
-                                #     ),
-                                #     href='/bkpts'
-                                # ),
+                                dcc.Link(
+                                    html.Button(
+                                        "Midia Pred",
+                                        id="midia_pred",
+                                        n_clicks=0,
+                                        style={
+                                            "padding": "10px",
+                                            "borderRadius": "5px",
+                                            "backgroundColor": "#3a3a3a",
+                                            "color": "white",
+                                            "fontSize": "14px",
+                                        },
+                                    ),
+                                    href='/midia_pred'
+                                ),
+                                dcc.Link(
+                                    html.Button(
+                                        "Buy/Sell Trend",
+                                        id="bstrends",
+                                        n_clicks=0,
+                                        style={
+                                            "padding": "10px",
+                                            "borderRadius": "5px",
+                                            "backgroundColor": "#3a3a3a",
+                                            "color": "white",
+                                            "fontSize": "14px",
+                                        },
+                                    ),
+                                    href='/bstrend'
+                                ),
+                                dcc.Link(
+                                    html.Button(
+                                        "Breakpoints",
+                                        id="breakpoints",
+                                        n_clicks=0,
+                                        style={
+                                            "padding": "10px",
+                                            "borderRadius": "5px",
+                                            "backgroundColor": "#3a3a3a",
+                                            "color": "white",
+                                            "fontSize": "14px",
+                                        },
+                                    ),
+                                    href='/bkpts'
+                                ),
                             ],
                         ),
                     ],
@@ -323,7 +342,6 @@ layout = html.Div(
     ],
 )
 
-
 # @dash.callback(
 #     Output("header-animation", "figure"),
 #     Input("interval-update", "n_intervals"),
@@ -333,28 +351,130 @@ layout = html.Div(
 #     index = min(n_intervals + 1, len(predefined_x))
 #     return create_fig_with_point(index)
 
+
+
 @dash.callback(
-    Output("main-graph", "figure"),  # Atualiza o gráfico principal
     [
-        Input("calculate-button", "n_clicks"),  # Botão Calcular
+        Output("main-graph", "figure"),  # Atualiza o gráfico principal
+        Output("stocks-list", "children"),  # Atualiza a lista de ativos exibida
     ],
-    [State("input-stocks", "value")],
-    allow_duplicate=True,prevent_initial_call=True  # Estado do campo de texto
+    Input("add-stock-button", "n_clicks"),  # Botão "Adicionar Ativo"
+    [
+        State("dropdown-stocks", "value"),  # Valor selecionado no dropdown
+        State("input-percentage", "value"),  # Porcentagem digitada
+        State("stocks-list", "children"),  # Lista de ativos atual
+    ],
+    prevent_initial_call=True,  # Ignora o callback na inicialização
 )
-def update_graph( calc_button,ticker_input):#btn1_clicks, btn2_clicks,
-    ctx = dash.callback_context
-    if not ctx.triggered:
-        return create_placeholder_figure()  # Retorna o gráfico padrão se nenhuma interação ocorreu
+def update_stocks_list_with_graph(n_clicks, stock, percentage, current_list):
+    # Inicializa a lista caso seja None
+    
+    if current_list is None:
+        current_list = []
 
-    # Determinar qual entrada disparou o callback
-    triggered_input = ctx.triggered[0]["prop_id"].split(".")[0]
+    # Validação de inputs
+    if not stock or not percentage:
+        return create_placeholder_figure()  # Não atualiza nada se inputs forem inválidos
 
-    if triggered_input == "calculate-button" and ticker_input:
+    # Criar novo item para a lista
+    new_item = html.Div(
+        style={"display": "flex", "justifyContent": "space-between", "padding": "5px 0"},
+        children=[
+            html.Span(f"{stock} ({percentage}%)", style={"color": "#FFFFFF"}),
+            html.Button(
+                "Remove",
+                id={"type": "remove-button", "index": len(current_list)},  # ID dinâmico
+                n_clicks=0,
+                style={
+                    "backgroundColor": "red",
+                    "color": "white",
+                    "border": "none",
+                    "borderRadius": "5px",
+                    "padding": "5px",
+                    "cursor": "pointer",
+                    "fontSize": "12px",
+                },
+            ),
+        ],
+    )
 
-        result = wallet_simulate(ativos, indices, data_comparacao)
-        return result
+    # Atualiza a lista de componentes
+    updated_list = current_list + [new_item]
 
-    return create_placeholder_figure()  # Retorna o gráfico padrão como fallback
+    # Simular cálculo de gráfico
+    asset[stock + ".SA"] = [percentage]
+    result = wallet_simulate(
+        asset, indices=["^BVSP"], data_comparacao=("2018-01-01", "2024-11-20")
+    )
+    print('asset state:',asset)
+    print('current state:',current_list)
+
+    # Certifique-se de que `result` é um objeto válido de figura do Plotly
+    if isinstance(result, go.Figure):
+        figure = result
+    else:
+        figure = create_placeholder_figure()
+
+    return figure, updated_list
 
 
 
+
+
+
+
+
+# semi functional callback:
+# @dash.callback(
+#     Output("main-graph", "figure"),
+#     Output("stocks-list", "children"),  # Atualiza a lista de ativos exibida
+#     Input("add-stock-button", "n_clicks"),  # Botão "Adicionar Ativo"
+#     State("dropdown-stocks", "value"),  # Valor selecionado no dropdown
+#     State("input-percentage", "value"),  # Porcentagem digitada
+#     State("stocks-list", "children"),  # Lista de ativos atual
+#     prevent_initial_call=True,  # Ignora o callback na inicialização
+# )
+# def update_stocks_list_with_graph(n_clicks, stock, percentage, current_list):
+#     # Verifica se o botão foi clicado e os inputs estão preenchidos
+#     if current_list == None:
+#         print('None identificado !')
+#         current_list = []
+#     if ctx.triggered_id == "add-stock-button":
+#         if not stock or not percentage:
+#             return current_list,create_placeholder_figure()  # Retorna a lista atual se os inputs estiverem incompletos
+
+#         # Formata o novo item da lista
+#         new_item = html.Div(
+#             style={"display": "flex", "justifyContent": "space-between", "padding": "5px 0"},
+#             children=[
+#                 html.Span(f"{stock} ({percentage}%)", style={"color": "#FFFFFF"}),
+#                 html.Button(
+#                     "Remove",
+#                     id={"type": "remove-button", "index": len(current_list)},  # ID dinâmico para cada botão
+#                     n_clicks=0,
+#                     style={
+#                         "backgroundColor": "red",
+#                         "color": "white",
+#                         "border": "none",
+#                         "borderRadius": "5px",
+#                         "padding": "5px",
+#                         "cursor": "pointer",
+#                         "fontSize": "12px",
+#                     },
+#                 ),
+#             ],
+#         )
+#         asset[stock+'.SA'] = [percentage]
+#         result = wallet_simulate(asset, indices=['^BVSP'], data_comparacao=('2018-01-01', '2024-11-20'))
+
+#         # Atualiza a lista adicionando o novo item
+#         return current_list + [new_item] , result
+
+#     # if ctx.triggered_id == "add-stock-button" and stock and percentage:
+#     #     print('stock:',stock)
+#     #     print('percent:',percentage)
+#     #     #sessão onde calculo o gráfico!... usando stock e percentage
+
+
+
+#     return current_list, create_placeholder_figure()

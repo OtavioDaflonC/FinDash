@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
+
 def wallet_simulate(ativos, indices, data_comparacao):
     """
     Cria uma carteira com base nos ativos e compara sua performance com índices de mercado.
@@ -77,3 +78,6 @@ def wallet_simulate(ativos, indices, data_comparacao):
     )
 
     return fig
+
+
+
