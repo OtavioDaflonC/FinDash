@@ -1,4 +1,42 @@
 import plotly.graph_objects as go
+import numpy as np
+
+
+# Gerar arrays predefinidos
+grath_xsize = 1000
+def generate_random_data(size=1000):
+    x = list(range(size))
+    y = (np.cumsum(np.random.normal(0, 2, size))**2 +1) /90 # Série estocástica acumulada
+    return x, y
+predefined_x, predefined_y = generate_random_data()
+
+# Criar layout do gráfico inicial com um ponto
+def create_fig_with_point(index):
+    fig = go.Figure(
+        layout=go.Layout(
+            xaxis=dict(
+                visible=False,
+                range=[0, grath_xsize],  # Scale
+            ),
+            yaxis=dict(
+                visible=False,
+                range=[0, 50],  # Scale
+            ),
+            margin=dict(t=0, b=0, l=0, r=0),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=predefined_x[:index],
+            y=predefined_y[:index],
+            mode="lines",
+            line=dict(color="lime", width=2),
+        )
+    )
+    return fig
 
 def create_placeholder_figure():
     # Configurando o layout
@@ -36,4 +74,9 @@ def create_placeholder_figure():
     )
 
     return fig
+
+
+
+
+
 

@@ -4,57 +4,17 @@ from dash import html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
 import plotly.express as px
-# from modules.multi_frame import *
-from modules.wallet_simulation import wallet_simulate
+from modules.multi_frame import *
 from utils import *
 
-#=========================================================================
-# for example:
-
-start = '2018-01-01'
-ativos = {
-    'BBAS3.SA': [ 0.209],  
-    'CSNA3.SA': [ 0.042],  
-    'FLRY3.SA': [  0.051],
-    'ITSA4.SA': [ 0.089],
-    'KEPL3.SA': [ 0.175],
-    'KLBN4.SA': [ 0.083],
-    'TAEE4.SA': [ 0.061],
-    'MGLU3.SA': [ 0.002],
-    'UNIP6.SA': [ 0.107],
-    'GOAU4.SA': [ 0.18],
- 
-}
-
-indices = ['^GSPC', '^BVSP','^N225']  
-data_comparacao = (start, '2024-11-20') # datas de compra precisam ser antes da primeira data desse intervalo
-
-
-#end example
-#============================================================================
 
 dash.register_page(
     __name__,
-    path="/wallet-simulation",  # main path
-    name="Dashboard",
+    path="/multi-frame",  # main path
+    name="multi-frame_Dashboard",
 )
 
 
-
-# Criando o gráfico estático com os dados predefinidos
-
-# Criando o gráfico com os dados predefinidos
-# fig_animation = create_static_animation(predefined_x, predefined_y)
-
-# Gráfico de exemplo
-fig = go.Figure()
-fig.add_trace(
-    go.Scatter(
-        x=["01/01/2024", "01/03/2024", "01/05/2024", "01/07/2024", "01/11/2024"],
-        y=[0.5, 0.7, 1.2, 2.5, 3.5],
-    )
-)
-# Main layout
 layout = html.Div(
     style={"backgroundColor": "#1e1e1e", "color": "#FFFFFF", "fontFamily": "Arial"},
     children=[
@@ -121,7 +81,7 @@ layout = html.Div(
                     },
                     children=[
                         html.H4(
-                            "Selecione seus ativos",
+                            "Select assets",
                             style={"textAlign": "center", "marginBottom": "20px", "fontSize": "18px"},
                         ),
                         dcc.Input(
@@ -138,7 +98,7 @@ layout = html.Div(
                         ),
                         html.Button(
                             "Calcular",
-                            id="calculate-button",
+                            id="calculate-button2",
                             n_clicks=0,
                             style={
                                 "width": "100%",
@@ -189,51 +149,51 @@ layout = html.Div(
                                     ),
                                     href='/multi-frame'
                                 ),
-                                # dcc.Link(
-                                #     html.Button(
-                                #         "Midia Pred",
-                                #         id="midia_pred",
-                                #         n_clicks=0,
-                                #         style={
-                                #             "padding": "10px",
-                                #             "borderRadius": "5px",
-                                #             "backgroundColor": "#3a3a3a",
-                                #             "color": "white",
-                                #             "fontSize": "14px",
-                                #         },
-                                #     ),
-                                #     href='/midia_pred'
-                                # ),
-                                # dcc.Link(
-                                #     html.Button(
-                                #         "Buy/Sell Trend",
-                                #         id="bstrends",
-                                #         n_clicks=0,
-                                #         style={
-                                #             "padding": "10px",
-                                #             "borderRadius": "5px",
-                                #             "backgroundColor": "#3a3a3a",
-                                #             "color": "white",
-                                #             "fontSize": "14px",
-                                #         },
-                                #     ),
-                                #     href='/bstrend'
-                                # ),
-                                # dcc.Link(
-                                #     html.Button(
-                                #         "Breakpoints",
-                                #         id="breakpoints",
-                                #         n_clicks=0,
-                                #         style={
-                                #             "padding": "10px",
-                                #             "borderRadius": "5px",
-                                #             "backgroundColor": "#3a3a3a",
-                                #             "color": "white",
-                                #             "fontSize": "14px",
-                                #         },
-                                #     ),
-                                #     href='/bkpts'
-                                # ),
+                                dcc.Link(
+                                    html.Button(
+                                        "Midia Pred",
+                                        id="midia_pred",
+                                        n_clicks=0,
+                                        style={
+                                            "padding": "10px",
+                                            "borderRadius": "5px",
+                                            "backgroundColor": "#3a3a3a",
+                                            "color": "white",
+                                            "fontSize": "14px",
+                                        },
+                                    ),
+                                    href='/midia_pred'
+                                ),
+                                dcc.Link(
+                                    html.Button(
+                                        "Buy/Sell Trend",
+                                        id="bstrends",
+                                        n_clicks=0,
+                                        style={
+                                            "padding": "10px",
+                                            "borderRadius": "5px",
+                                            "backgroundColor": "#3a3a3a",
+                                            "color": "white",
+                                            "fontSize": "14px",
+                                        },
+                                    ),
+                                    href='/bstrend'
+                                ),
+                                dcc.Link(
+                                    html.Button(
+                                        "Breakpoints",
+                                        id="breakpoints",
+                                        n_clicks=0,
+                                        style={
+                                            "padding": "10px",
+                                            "borderRadius": "5px",
+                                            "backgroundColor": "#3a3a3a",
+                                            "color": "white",
+                                            "fontSize": "14px",
+                                        },
+                                    ),
+                                    href='/bkpts'
+                                ),
                             ],
                         ),
                     ],
@@ -299,7 +259,7 @@ layout = html.Div(
                             style={"marginTop": "30px"},
                             children=[
                                 html.H1(
-                                    "Wallet Simulation",
+                                    "Multi-Frame Analysis",
                                     style={
                                         "textAlign": "center",
                                         "marginBottom": "20px",
@@ -310,7 +270,7 @@ layout = html.Div(
                                     id="loading-indicator",
                                     type="circle",
                                     children=[
-                                        dcc.Graph(id="main-graph", figure=create_placeholder_figure()),
+                                        dcc.Graph(id="multi_frame_graph", figure=create_placeholder_figure()),
                                     ],
                                     style={"marginTop": "20px"},
                                 ),
@@ -324,22 +284,25 @@ layout = html.Div(
 )
 
 
-# @dash.callback(
-#     Output("header-animation", "figure"),
-#     Input("interval-update", "n_intervals"),
-# )
-# def update_header_animation(n_intervals):
-#     # Limitar o índice ao tamanho dos dados
-#     index = min(n_intervals + 1, len(predefined_x))
-#     return create_fig_with_point(index)
+@dash.callback(
+    Output("header-animation", "figure"),
+    Input("interval-update", "n_intervals"),
+)
+def update_header_animation(n_intervals):
+    # Limitar o índice ao tamanho dos dados
+    index = min(n_intervals + 1, len(predefined_x))
+    return create_fig_with_point(index)
+
+
 
 @dash.callback(
-    Output("main-graph", "figure"),  # Atualiza o gráfico principal
+    Output("multi_frame_graph", "figure"),  # Atualiza o gráfico principal
     [
-        Input("calculate-button", "n_clicks"),  # Botão Calcular
+        # Input("multi_frame", "n_clicks"),  # Botão Multi Frame
+        # Input("opt2", "n_clicks"),        # Outro botão
+        Input("calculate-button2", "n_clicks"),  # Botão Calcular
     ],
-    [State("input-stocks", "value")],
-    allow_duplicate=True,prevent_initial_call=True  # Estado do campo de texto
+    [State("input-stocks", "value")]  # Estado do campo de texto
 )
 def update_graph( calc_button,ticker_input):#btn1_clicks, btn2_clicks,
     ctx = dash.callback_context
@@ -349,10 +312,13 @@ def update_graph( calc_button,ticker_input):#btn1_clicks, btn2_clicks,
     # Determinar qual entrada disparou o callback
     triggered_input = ctx.triggered[0]["prop_id"].split(".")[0]
 
-    if triggered_input == "calculate-button" and ticker_input:
+    if triggered_input == "calculate-button2" and ticker_input:
+        # Lógica para atualizar o gráfico com base no campo de texto
+        for ticker in ticker_input.split(","):  # Suporta múltiplos tickers separados por vírgulas
+            ticker = ticker.strip() + ".SA"
+            df[ticker] = [analisar_serie_temporal_yahoo(ticker, time) for time in macro_time]
 
-        result = wallet_simulate(ativos, indices, data_comparacao)
-        return result
+        return px.line(df)  # Gráfico atualizado com os dados fornecidos
 
     return create_placeholder_figure()  # Retorna o gráfico padrão como fallback
 

@@ -71,7 +71,7 @@ layout = html.Div(
                             'cursor': 'pointer',
                         }
                     ),
-                    href='/main'
+                    href='/wallet-simulation'
                 ),
                 dcc.Link(
                     html.Button(
