@@ -1,13 +1,12 @@
 import dash
 import pandas as pd
-from dash import html, dcc, Input, Output, State, ctx
+from dash import html, dcc, Input, Output, State, ctx,MATCH, ALL
 import plotly.graph_objects as go
 import numpy as np
 import plotly.express as px
-# from modules.multi_frame import *
-from modules.wallet_simulation import wallet_simulate
+from modules.wallet_simulation import wallet_simulate, asset
 from utils import *
-asset={}
+
 #=========================================================================
 # for example:
 
@@ -261,57 +260,40 @@ layout = html.Div(
                 html.Div(
                     style={"width": "75%", "padding": "15px", "borderRadius": "10px"},
                     children=[
+                        # Botões em vez de divs horizontais
                         html.Div(
-                            style={"display": "grid", "gridTemplateColumns": "repeat(4, 1fr)", "gap": "15px"},
+                            style={
+                                "display": "grid",
+                                "gridTemplateColumns": "repeat(4, 1fr)",
+                                "gap": "15px",
+                            },
                             children=[
-                                html.Div(
-                                    style={
-                                        "backgroundColor": "#2c2c2c",
-                                        "padding": "10px",
-                                        "borderRadius": "5px",
-                                        "textAlign": "center",
-                                    },
-                                    children=[
-                                        html.H6("Variable 4", style={"marginBottom": "5px", "fontSize": "14px"}),
-                                        html.H3("Value", style={"margin": "0", "fontSize": "18px"}),
-                                    ],
-                                ),
-                                html.Div(
-                                    style={
-                                        "backgroundColor": "#2c2c2c",
-                                        "padding": "10px",
-                                        "borderRadius": "5px",
-                                        "textAlign": "center",
-                                    },
-                                    children=[
-                                        html.H6("Variable 3", style={"marginBottom": "5px", "fontSize": "14px"}),
-                                        html.H3("Value", style={"margin": "0", "fontSize": "18px"}),
-                                    ],
-                                ),
-                                html.Div(
-                                    style={
-                                        "backgroundColor": "#2c2c2c",
-                                        "padding": "10px",
-                                        "borderRadius": "5px",
-                                        "textAlign": "center",
-                                    },
-                                    children=[
-                                        html.H6("Variable", style={"marginBottom": "5px", "fontSize": "14px"}),
-                                        html.H3("Value", style={"margin": "0", "fontSize": "18px"}),
-                                    ],
-                                ),
-                                html.Div(
-                                    style={
-                                        "backgroundColor": "#2c2c2c",
-                                        "padding": "10px",
-                                        "borderRadius": "5px",
-                                        "textAlign": "center",
-                                    },
-                                    children=[
-                                        html.H6("Variable 2", style={"marginBottom": "5px", "fontSize": "14px"}),
-                                        html.H3("Value", style={"margin": "0", "fontSize": "18px"}),
-                                    ],
-                                ),
+                            html.Div(
+                                style={
+                                    "display": "flex",
+                                    "justifyContent": "center",
+                                    "alignItems": "center",
+                                    "borderRadius": "8px",
+                                    "backgroundColor": "#2c2c2c",
+                                    "padding": "20px",
+                                    "color": "white",
+                                    "fontSize": "18px",
+                                    "width": "1050px",  # Somando as larguras dos botões (4 * 262px) com gaps mínimos
+                                    "height": "105px",  # Igual à altura dos botões
+                                    "textAlign": "center",
+                                },
+                                children=[
+                                    html.P(
+                                        "Texto instrutivo aqui. Substitua este texto pelo conteúdo necessário.",
+                                        style={
+                                            "margin": "0",
+                                            "fontSize": "18px",
+                                            "fontWeight": "bold",
+                                            "textAlign": "center",
+                                        },
+                                    ),
+                                ],
+                            )
                             ],
                         ),
                         html.Div(
@@ -352,129 +334,91 @@ layout = html.Div(
 #     return create_fig_with_point(index)
 
 
-
 @dash.callback(
     [
         Output("main-graph", "figure"),  # Atualiza o gráfico principal
         Output("stocks-list", "children"),  # Atualiza a lista de ativos exibida
     ],
-    Input("add-stock-button", "n_clicks"),  # Botão "Adicionar Ativo"
+    [
+        Input("add-stock-button", "n_clicks"),  # Botão "Adicionar Ativo"
+        Input({"type": "remove-button", "index": ALL}, "n_clicks"),  # Botões de remoção
+    ],
     [
         State("dropdown-stocks", "value"),  # Valor selecionado no dropdown
         State("input-percentage", "value"),  # Porcentagem digitada
         State("stocks-list", "children"),  # Lista de ativos atual
     ],
-    prevent_initial_call=True,  # Ignora o callback na inicialização
+    prevent_initial_call=True,
 )
-def update_stocks_list_with_graph(n_clicks, stock, percentage, current_list):
-    # Inicializa a lista caso seja None
-    
+def manage_stocks(add_clicks, remove_clicks, stock, percentage, current_list):
+    # Inicializar lista, se necessário
     if current_list is None:
         current_list = []
 
-    # Validação de inputs
-    if not stock or not percentage:
-        return create_placeholder_figure()  # Não atualiza nada se inputs forem inválidos
+    ctx = dash.callback_context
+    triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]  # Identifica o elemento que acionou o callback
 
-    # Criar novo item para a lista
-    new_item = html.Div(
-        style={"display": "flex", "justifyContent": "space-between", "padding": "5px 0"},
-        children=[
-            html.Span(f"{stock} ({percentage}%)", style={"color": "#FFFFFF"}),
-            html.Button(
-                "Remove",
-                id={"type": "remove-button", "index": len(current_list)},  # ID dinâmico
-                n_clicks=0,
-                style={
-                    "backgroundColor": "red",
-                    "color": "white",
-                    "border": "none",
-                    "borderRadius": "5px",
-                    "padding": "5px",
-                    "cursor": "pointer",
-                    "fontSize": "12px",
-                },
-            ),
-        ],
-    )
+    # Se o botão de adicionar foi clicado
+    if triggered_id == "add-stock-button":
+        if not stock or not percentage:  # Validação dos inputs
+            return create_placeholder_figure(), current_list
 
-    # Atualiza a lista de componentes
-    updated_list = current_list + [new_item]
+        # Gerar ID único baseado no nome do ativo (ou outra lógica de identificação única)
+        item_id = f"{stock}-{percentage}-{len(current_list)}"
 
-    # Simular cálculo de gráfico
-    asset[stock + ".SA"] = [percentage]
-    result = wallet_simulate(
-        asset, indices=["^BVSP"], data_comparacao=("2018-01-01", "2024-11-20")
-    )
-    print('asset state:',asset)
-    print('current state:',current_list)
+        # Criar novo item para a lista
+        new_item = html.Div(
+            id={"type": "stock-item", "index": item_id},  # ID único para cada seção
+            style={"display": "flex", "justifyContent": "space-between", "padding": "5px 0"},
+            children=[
+                html.Span(f"{stock} ({percentage}%)", style={"color": "#FFFFFF"}),
+                html.Button(
+                    "Remove",
+                    id={"type": "remove-button", "index": item_id},  # ID único dinâmico
+                    n_clicks=0,
+                    style={
+                        "backgroundColor": "red",
+                        "color": "white",
+                        "border": "none",
+                        "borderRadius": "5px",
+                        "padding": "5px",
+                        "cursor": "pointer",
+                        "fontSize": "12px",
+                    },
+                ),
+            ],
+        )
+        # Atualiza a lista de componentes
+        updated_list = current_list + [new_item]
 
-    # Certifique-se de que `result` é um objeto válido de figura do Plotly
-    if isinstance(result, go.Figure):
-        figure = result
-    else:
-        figure = create_placeholder_figure()
+        # Simular cálculo de gráfico
+        asset[stock + ".SA"] = [round(percentage / 100, 2)]
+        result = wallet_simulate(
+            asset, indices=["^BVSP", "^GSPC", "BTC-USD"], data_comparacao=("2018-01-01", "2024-11-20")
+        )
 
-    return figure, updated_list
+        if isinstance(result, go.Figure):
+            figure = result
+        else:
+            figure = create_placeholder_figure()
 
+        return figure, updated_list
 
+    # Se um botão de remoção foi clicado
+    elif "remove-button" in triggered_id:
+        # Identificar o ID do botão clicado
+        remove_id = eval(triggered_id)["index"]  # Obtem o ID único do botão clicado
 
+        # Remover o item correspondente ao ID
+        updated_list = [
+            item for item in current_list if item["props"]["id"]["index"] != remove_id
+        ]
 
+        # Recalcular o gráfico (se necessário) com a nova lista
+        figure = create_placeholder_figure()  # Ajuste para recalcular o gráfico, se for o caso
+        return figure, updated_list
 
-
-
-
-# semi functional callback:
-# @dash.callback(
-#     Output("main-graph", "figure"),
-#     Output("stocks-list", "children"),  # Atualiza a lista de ativos exibida
-#     Input("add-stock-button", "n_clicks"),  # Botão "Adicionar Ativo"
-#     State("dropdown-stocks", "value"),  # Valor selecionado no dropdown
-#     State("input-percentage", "value"),  # Porcentagem digitada
-#     State("stocks-list", "children"),  # Lista de ativos atual
-#     prevent_initial_call=True,  # Ignora o callback na inicialização
-# )
-# def update_stocks_list_with_graph(n_clicks, stock, percentage, current_list):
-#     # Verifica se o botão foi clicado e os inputs estão preenchidos
-#     if current_list == None:
-#         print('None identificado !')
-#         current_list = []
-#     if ctx.triggered_id == "add-stock-button":
-#         if not stock or not percentage:
-#             return current_list,create_placeholder_figure()  # Retorna a lista atual se os inputs estiverem incompletos
-
-#         # Formata o novo item da lista
-#         new_item = html.Div(
-#             style={"display": "flex", "justifyContent": "space-between", "padding": "5px 0"},
-#             children=[
-#                 html.Span(f"{stock} ({percentage}%)", style={"color": "#FFFFFF"}),
-#                 html.Button(
-#                     "Remove",
-#                     id={"type": "remove-button", "index": len(current_list)},  # ID dinâmico para cada botão
-#                     n_clicks=0,
-#                     style={
-#                         "backgroundColor": "red",
-#                         "color": "white",
-#                         "border": "none",
-#                         "borderRadius": "5px",
-#                         "padding": "5px",
-#                         "cursor": "pointer",
-#                         "fontSize": "12px",
-#                     },
-#                 ),
-#             ],
-#         )
-#         asset[stock+'.SA'] = [percentage]
-#         result = wallet_simulate(asset, indices=['^BVSP'], data_comparacao=('2018-01-01', '2024-11-20'))
-
-#         # Atualiza a lista adicionando o novo item
-#         return current_list + [new_item] , result
-
-#     # if ctx.triggered_id == "add-stock-button" and stock and percentage:
-#     #     print('stock:',stock)
-#     #     print('percent:',percentage)
-#     #     #sessão onde calculo o gráfico!... usando stock e percentage
+    return create_placeholder_figure(), current_list  # Caso nada seja acionado
 
 
 
-#     return current_list, create_placeholder_figure()
