@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 
 asset={}
 def wallet_simulate(ativos, indices, data_comparacao):
+    
     """
     Cria uma carteira com base nos ativos e compara sua performance com índices de mercado.
 
@@ -16,6 +17,32 @@ def wallet_simulate(ativos, indices, data_comparacao):
 
     Retorno:
         pd.DataFrame: DataFrame contendo o rendimento acumulado da carteira e dos índices.
+
+
+        #=========================================================================
+# for example:
+
+# start = '2018-01-01'
+# ativos = {
+#     'BBAS3.SA': [ 0.209],  
+#     'CSNA3.SA': [ 0.042],  
+#     'FLRY3.SA': [  0.051],
+#     'ITSA4.SA': [ 0.089],
+#     'KEPL3.SA': [ 0.175],
+#     'KLBN4.SA': [ 0.083],
+#     'TAEE4.SA': [ 0.061],
+#     'MGLU3.SA': [ 0.002],
+#     'UNIP6.SA': [ 0.107],
+#     'GOAU4.SA': [ 0.18],
+ 
+# }
+
+# indices = ['^GSPC', '^BVSP','^N225']  
+# data_comparacao = (start, '2024-11-20') # datas de compra precisam ser antes da primeira data desse intervalo
+
+
+#end example
+#============================================================================
     """
     # Validar as datas
     data_inicio = pd.to_datetime(data_comparacao[0])  # Data de início definida pelo usuário
@@ -36,17 +63,15 @@ def wallet_simulate(ativos, indices, data_comparacao):
     pesos_carteira /= pesos_carteira.sum()
 
     # Calcular o retorno da carteira
-    retorno_carteira = (retornos_diarios[list(ativos.keys())] @ pesos_carteira).rename("Carteira")
+    retorno_carteira = (retornos_diarios[list(ativos.keys())] @ pesos_carteira).rename("Portifolio")
     rendimento_acumulado = (1 + retorno_carteira).cumprod() - 1
 
     # Calcular o rendimento acumulado dos índices
     rendimento_indices = (1 + retornos_diarios[indices]).cumprod() - 1
-
-    # Combinar os resultados em um único DataFrame
     resultado = pd.concat([rendimento_acumulado, rendimento_indices], axis=1)
     resultado.index.name = "Data"
 
-    # Criar o gráfico
+
     fig = go.Figure()
 
     # Adicionar a performance da carteira
@@ -58,7 +83,7 @@ def wallet_simulate(ativos, indices, data_comparacao):
         line=dict(width=2, color='blue')
     ))
 
-    # Adicionar a performance dos índices
+
     for indice in indices:
         fig.add_trace(go.Scatter(
             x=resultado.index,
@@ -68,7 +93,6 @@ def wallet_simulate(ativos, indices, data_comparacao):
             line=dict(width=2)
         ))
 
-    # Configurar o layout do gráfico
     fig.update_layout(
         title="Performance Acumulada: Carteira vs Índices",
         xaxis_title="Data",
@@ -79,5 +103,13 @@ def wallet_simulate(ativos, indices, data_comparacao):
 
     return fig
 
+description = """
+Welcome! Here is the place to simulate a portifolio's performance managing asset weights and time range freely.
+You can add stocks, index funds, some cripto... whatever you like.
 
+ You can search for the acceptable tickets at : https://finance.yahoo.com/
+Please keep in mind that this dashboard will accept only yahoo finance asset terminology. e.g: A brazilian stock will need the
+sufix '.SA' such as PETR4.SA.
 
+Also you should write the date in  "DD/MM/YYYY" format.
+"""

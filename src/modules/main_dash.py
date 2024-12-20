@@ -4,33 +4,11 @@ from dash import html, dcc, Input, Output, State, ctx,MATCH, ALL
 import plotly.graph_objects as go
 import numpy as np
 import plotly.express as px
-from modules.wallet_simulation import wallet_simulate, asset
+from modules.wallet_simulation import wallet_simulate, asset, description
 from utils import *
 
-#=========================================================================
-# for example:
+default_index = ["^BVSP", "^GSPC", "BTC-USD"]
 
-start = '2018-01-01'
-ativos = {
-    'BBAS3.SA': [ 0.209],  
-    'CSNA3.SA': [ 0.042],  
-    'FLRY3.SA': [  0.051],
-    'ITSA4.SA': [ 0.089],
-    'KEPL3.SA': [ 0.175],
-    'KLBN4.SA': [ 0.083],
-    'TAEE4.SA': [ 0.061],
-    'MGLU3.SA': [ 0.002],
-    'UNIP6.SA': [ 0.107],
-    'GOAU4.SA': [ 0.18],
- 
-}
-
-indices = ['^GSPC', '^BVSP','^N225']  
-data_comparacao = (start, '2024-11-20') # datas de compra precisam ser antes da primeira data desse intervalo
-
-
-#end example
-#============================================================================
 
 dash.register_page(
     __name__,
@@ -99,13 +77,56 @@ layout = html.Div(
                     },
                     config={"staticPlot": True},
                 ),
-                dcc.Interval(
+               dcc.Interval(
                     id="interval-update",
                     interval=300,
                     n_intervals=0,
                 ),
             ],
         ),
+        # Date selection
+        html.Div(
+            style={
+                "display": "flex",
+                "justifyContent": "center",
+                "marginBottom": "20px",
+                "padding": "10px 20px",
+                "backgroundColor": "#2c2c2c",
+                "borderRadius": "10px",
+            },
+            children=[
+                html.Label(
+                    "Select time range:",
+                    style={"marginRight": "10px", "color": "#FFFFFF", "textAlign": "center"},
+                ),
+                dcc.DatePickerRange(
+                    id="date-picker-range",
+                    start_date_placeholder_text="  Start Date",
+                    end_date_placeholder_text="  End Date",
+                    calendar_orientation="horizontal",
+                    day_size=39,
+                    display_format="DD/MM/YYYY",
+                    style={"backgroundColor": "#1e1e1e", "color": "#FFFFFF", "textAlign": "center"},
+                ),
+                                html.Button(
+            "Confirm",
+            id="confirm-date-button",
+            n_clicks=0,
+            style={
+                "marginLeft": "10px",
+                "padding": "10px 20px",
+                "backgroundColor": "#007BFF",
+                "color": "white",
+                "border": "none",
+                "borderRadius": "5px",
+                "cursor": "pointer",
+                "fontSize": "14px",
+            },
+        ),
+            ],
+        ),
+
+
         # Main content
         html.Div(
             style={"display": "flex", "padding": "20px", "gap": "20px"},
@@ -171,7 +192,7 @@ layout = html.Div(
                             style={"marginTop": "20px", "color": "#FFFFFF"},
                         ),
                         html.H5(
-                            "Opções de análise",
+                            "Our Playground:",
                             style={"marginBottom": "10px", "color": "#FFFFFF", "fontSize": "16px"},
                         ),
                         html.Div(
@@ -268,32 +289,34 @@ layout = html.Div(
                                 "gap": "15px",
                             },
                             children=[
-                            html.Div(
-                                style={
-                                    "display": "flex",
-                                    "justifyContent": "center",
-                                    "alignItems": "center",
-                                    "borderRadius": "8px",
-                                    "backgroundColor": "#2c2c2c",
-                                    "padding": "20px",
-                                    "color": "white",
-                                    "fontSize": "18px",
-                                    "width": "1050px",  # Somando as larguras dos botões (4 * 262px) com gaps mínimos
-                                    "height": "105px",  # Igual à altura dos botões
-                                    "textAlign": "center",
-                                },
-                                children=[
-                                    html.P(
-                                        "Texto instrutivo aqui. Substitua este texto pelo conteúdo necessário.",
-                                        style={
-                                            "margin": "0",
-                                            "fontSize": "18px",
-                                            "fontWeight": "bold",
-                                            "textAlign": "center",
-                                        },
-                                    ),
-                                ],
-                            )
+                html.Div(
+                    style={
+                        "display": "flex",
+                        "justifyContent": "center",
+                        # "alignItems": "center",
+                        "borderRadius": "8px",
+                        "backgroundColor": "#2c2c2c",
+                        "padding": "20px",
+                        "color": "white",
+                        "fontSize": "18px",
+                        "width": "1050px",  # Adjust as needed
+                        "height": "205px"  # Adjust as needed
+                        # "textAlign": "center",
+                    },
+                    children=[
+                        html.P(
+                            description,  # Ensure 'description' contains the desired text
+                            style={
+                                "margin": "0",
+                                "fontSize": "18px",
+                                # "fontWeight": "bold",
+                                # "textAlign": "center",
+                                "whiteSpace": "pre-wrap",  # Preserve spaces and line breaks
+                            },
+                        ),
+                    ],
+                )
+
                             ],
                         ),
                         html.Div(
@@ -324,57 +347,68 @@ layout = html.Div(
     ],
 )
 
-# @dash.callback(
-#     Output("header-animation", "figure"),
-#     Input("interval-update", "n_intervals"),
-# )
-# def update_header_animation(n_intervals):
-#     # Limitar o índice ao tamanho dos dados
-#     index = min(n_intervals + 1, len(predefined_x))
-#     return create_fig_with_point(index)
-
 
 @dash.callback(
     [
         Output("main-graph", "figure"),  # Atualiza o gráfico principal
         Output("stocks-list", "children"),  # Atualiza a lista de ativos exibida
+        Output("stored-stocks-data", "data"),  # Atualiza os dados armazenados
     ],
     [
         Input("add-stock-button", "n_clicks"),  # Botão "Adicionar Ativo"
         Input({"type": "remove-button", "index": ALL}, "n_clicks"),  # Botões de remoção
+        Input("confirm-date-button", "n_clicks"),  # Botão para confirmar a data
     ],
     [
         State("dropdown-stocks", "value"),  # Valor selecionado no dropdown
         State("input-percentage", "value"),  # Porcentagem digitada
-        State("stocks-list", "children"),  # Lista de ativos atual
+        State("stored-stocks-data", "data"),  # Dados armazenados dos ativos
+        State("date-picker-range", "start_date"),  # Data inicial selecionada
+        State("date-picker-range", "end_date"),  # Data final selecionada
     ],
     prevent_initial_call=True,
 )
-def manage_stocks(add_clicks, remove_clicks, stock, percentage, current_list):
-    # Inicializar lista, se necessário
-    if current_list is None:
-        current_list = []
+def manage_stocks(add_clicks, remove_clicks, confirm_date_clicks, stock, percentage, current_data, start_date, end_date):
+    if current_data is None:
+        current_data = []
 
     ctx = dash.callback_context
     triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]  # Identifica o elemento que acionou o callback
 
-    # Se o botão de adicionar foi clicado
-    if triggered_id == "add-stock-button":
-        if not stock or not percentage:  # Validação dos inputs
-            return create_placeholder_figure(), current_list
+    # Adicionar um novo ativo
+    if triggered_id == "add-stock-button" and stock and percentage:
+        new_item = {"stock": stock, "percentage": percentage}
+        current_data.append(new_item)
 
-        # Gerar ID único baseado no nome do ativo (ou outra lógica de identificação única)
-        item_id = f"{stock}-{percentage}-{len(current_list)}"
+    # Remover ativos
+    elif "remove-button" in triggered_id:
+        # Obtem o índice do botão clicado
+        remove_indices = [i for i, n in enumerate(remove_clicks) if n > 0]
+        if remove_indices:
+            index_to_remove = remove_indices[0]
+            current_data.pop(index_to_remove)
 
-        # Criar novo item para a lista
-        new_item = html.Div(
-            id={"type": "stock-item", "index": item_id},  # ID único para cada seção
+    # Atualizar o gráfico
+    figure = create_placeholder_figure()  # Gráfico padrão
+    if current_data:
+        # Converte os dados para o formato necessário
+        asset_data = {item["stock"]: [round(item["percentage"] / 100, 2)] for item in current_data}
+        result = wallet_simulate(
+            asset_data, indices=default_index, data_comparacao=(start_date.replace("/", "-"), end_date.replace("/", "-"))
+        )
+        if isinstance(result, go.Figure):
+            figure = result
+
+    # Atualizar a lista de ativos exibida
+    updated_list = [
+        html.Div(
+            id={"type": "stock-item", "index": i},
             style={"display": "flex", "justifyContent": "space-between", "padding": "5px 0"},
             children=[
-                html.Span(f"{stock} ({percentage}%)", style={"color": "#FFFFFF"}),
+                html.Span(f"{item['stock']} ({item['percentage']}%)", style={"color": "#FFFFFF"}),
                 html.Button(
                     "Remove",
-                    id={"type": "remove-button", "index": item_id},  # ID único dinâmico
+                    id={"type": "remove-button", "index": i},
                     n_clicks=0,
                     style={
                         "backgroundColor": "red",
@@ -388,37 +422,7 @@ def manage_stocks(add_clicks, remove_clicks, stock, percentage, current_list):
                 ),
             ],
         )
-        # Atualiza a lista de componentes
-        updated_list = current_list + [new_item]
+        for i, item in enumerate(current_data)
+    ]
 
-        # Simular cálculo de gráfico
-        asset[stock + ".SA"] = [round(percentage / 100, 2)]
-        result = wallet_simulate(
-            asset, indices=["^BVSP", "^GSPC", "BTC-USD"], data_comparacao=("2018-01-01", "2024-11-20")
-        )
-
-        if isinstance(result, go.Figure):
-            figure = result
-        else:
-            figure = create_placeholder_figure()
-
-        return figure, updated_list
-
-    # Se um botão de remoção foi clicado
-    elif "remove-button" in triggered_id:
-        # Identificar o ID do botão clicado
-        remove_id = eval(triggered_id)["index"]  # Obtem o ID único do botão clicado
-
-        # Remover o item correspondente ao ID
-        updated_list = [
-            item for item in current_list if item["props"]["id"]["index"] != remove_id
-        ]
-
-        # Recalcular o gráfico (se necessário) com a nova lista
-        figure = create_placeholder_figure()  # Ajuste para recalcular o gráfico, se for o caso
-        return figure, updated_list
-
-    return create_placeholder_figure(), current_list  # Caso nada seja acionado
-
-
-
+    return figure, updated_list, current_data
