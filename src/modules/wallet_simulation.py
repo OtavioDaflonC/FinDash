@@ -48,7 +48,7 @@ def wallet_simulate(ativos, indices, data_comparacao):
     data_inicio = pd.to_datetime(data_comparacao[0])  # Data de início definida pelo usuário
     data_fim = pd.to_datetime(data_comparacao[1])
 
-    # Baixar os dados de mercado
+    ptfnm = 'Portifolio' # portifolio name
     tickers = list(ativos.keys()) + indices
     dados = yf.download(tickers, start=data_inicio, end=data_fim)['Adj Close']
 
@@ -63,7 +63,7 @@ def wallet_simulate(ativos, indices, data_comparacao):
     pesos_carteira /= pesos_carteira.sum()
 
     # Calcular o retorno da carteira
-    retorno_carteira = (retornos_diarios[list(ativos.keys())] @ pesos_carteira).rename("Portifolio")
+    retorno_carteira = (retornos_diarios[list(ativos.keys())] @ pesos_carteira).rename(ptfnm)
     rendimento_acumulado = (1 + retorno_carteira).cumprod() - 1
 
     # Calcular o rendimento acumulado dos índices
@@ -77,7 +77,7 @@ def wallet_simulate(ativos, indices, data_comparacao):
     # Adicionar a performance da carteira
     fig.add_trace(go.Scatter(
         x=resultado.index,
-        y=resultado['Carteira'],
+        y=resultado[ptfnm],
         mode='lines',
         name='Carteira',
         line=dict(width=2, color='blue')
@@ -112,4 +112,6 @@ Please keep in mind that this dashboard will accept only yahoo finance asset ter
 sufix '.SA' such as PETR4.SA.
 
 Also you should write the date in  "DD/MM/YYYY" format.
+
+Make sure you use a total of 100% assets for confirm scale at percentage.
 """
