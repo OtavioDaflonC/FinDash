@@ -113,5 +113,5 @@ sufix '.SA' such as PETR4.SA.
 
 Also you should write the date in  "DD/MM/YYYY" format.
 
-Make sure you use a total of 100% assets for confirm scale at percentage.
+Make sure your choices weights sum up to 100% otherwise the scale will be given in a relative fraction, not in percentage.
 """

@@ -52,7 +52,7 @@ def create_placeholder_figure():
 
     # Adicionando uma anotação central
     fig.add_annotation(
-        text="Selecione um parâmetro para visualizar o gráfico!",
+        text="Select all the necessary parameters to generate!",
         x=0.5,
         y=0.5,
         font=dict(size=20, color="gray"),

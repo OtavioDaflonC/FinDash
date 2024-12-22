@@ -300,17 +300,17 @@ layout = html.Div(
                         "color": "white",
                         "fontSize": "18px",
                         "width": "1050px",  # Adjust as needed
-                        "height": "205px"  # Adjust as needed
+                        "height": "255px"  # Adjust as needed
                         # "textAlign": "center",
                     },
                     children=[
                         html.P(
-                            description,  # Ensure 'description' contains the desired text
+                            description, 
                             style={
                                 "margin": "0",
                                 "fontSize": "18px",
                                 # "fontWeight": "bold",
-                                # "textAlign": "center",
+                                #"textAlign": "center",
                                 "whiteSpace": "pre-wrap",  # Preserve spaces and line breaks
                             },
                         ),
@@ -371,7 +371,10 @@ layout = html.Div(
 def manage_stocks(add_clicks, remove_clicks, confirm_date_clicks, stock, percentage, current_data, start_date, end_date):
     if current_data is None:
         current_data = []
-
+    if stock is None:
+        pass
+    else:
+        stock = stock.upper()
     ctx = dash.callback_context
     triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]  # Identifica o elemento que acionou o callback
 
