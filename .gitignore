@@ -8,6 +8,8 @@ src/app2.py
 *.so
 #====================
 teste_layout.ipynb 
+new_apiidea.ipynb
+dot_env
 #====================
 # Distribution / packaging
 .Python
