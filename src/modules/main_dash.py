@@ -195,6 +195,7 @@ layout = html.Div(
                             "Our Playground:",
                             style={"marginBottom": "10px", "color": "#FFFFFF", "fontSize": "16px"},
                         ),
+                        #features
                         html.Div(
                             style={"display": "flex", "flexDirection": "column", "gap": "10px"},
                             children=[
@@ -227,6 +228,21 @@ layout = html.Div(
                                         },
                                     ),
                                     href='/multi-frame'
+                                ),
+                                dcc.Link(
+                                    html.Button(
+                                        "Monte Carlo Pred",
+                                        id="monte_carlo",
+                                        n_clicks=0,
+                                        style={
+                                            "padding": "10px",
+                                            "borderRadius": "5px",
+                                            "backgroundColor": "#3a3a3a",
+                                            "color": "white",
+                                            "fontSize": "14px",
+                                        },
+                                    ),
+                                    href='/mtcarlo'
                                 ),
                                 dcc.Link(
                                     html.Button(
